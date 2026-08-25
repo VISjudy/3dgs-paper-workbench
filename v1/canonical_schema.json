@@ -1,0 +1,52 @@
+{
+  "title": "3DGS论文Review工作台",
+  "page_type": "mixed",
+  "properties": {
+    "论文标题": { "text": "" },
+    "作者/机构": { "text": "" },
+    "年份": { "number": 0 },
+    "发表源": { "select": { "options": [ { "id": "j99Sd88sfcAg", "text": "arXiv" }, { "id": "yxNSaCLNSlKf", "text": "CVPR" }, { "id": "2RZoSHRVVsQI", "text": "ICCV" }, { "id": "o8IDSpWOLqKn", "text": "ECCV" }, { "id": "G77LSSZFFTQr", "text": "SIGGRAPH" }, { "id": "raZFyauFPyDJ", "text": "其他顶会" }, { "id": "yGDwarndUeFj", "text": "测绘SCI一区" }, { "id": "1tmPrW7b4hdD", "text": "其他期刊" } ] } },
+    "分类": { "multi_select": { "options": [ { "id": "h9ddIjOKYTHP", "text": "训练加速" }, { "id": "qS6PZT580GcN", "text": "LiDAR+图像多模态融合" }, { "id": "vTFEAEoblHd3", "text": "几何质量增强" }, { "id": "3791Qp2WBtOx", "text": "图像质量与伪影抑制" }, { "id": "Bji95fBVbIKr", "text": "综述/其他" } ] } },
+    "状态": { "select": { "options": [ { "id": "xqhGu6KmKnJj", "text": "待判断相关性" }, { "id": "ooMBvM3v2ItF", "text": "待精读" }, { "id": "NnBwqru5OhXz", "text": "已读已评价" } ] } },
+    "相关性": { "select": { "options": [ { "id": "aP7QUJ5WBfvR", "text": "高" }, { "id": "tSxdIvRXyIaf", "text": "中" }, { "id": "a3Au6d1DLSyb", "text": "低" } ] } },
+    "一句话总结": { "text": "" },
+    "关键词": { "text": "" },
+    "中文结构化摘要": { "text": "" },
+    "个人阅读体会": { "text": "" },
+    "论文原文链接": { "url": { "text": "原文", "link": "" } },
+    "结构化文档链接": { "url": { "text": "结构化文档", "link": "" } },
+    "添加日期": { "date": "yyyy-mm-dd" }
+  },
+  "field_mapping": {
+    "论文标题": { "value_type": "text", "form_input": "[data-field=\"title\"]", "display_selector": "[data-display=\"title\"]", "render_signal": null },
+    "作者/机构": { "value_type": "text", "form_input": "[data-field=\"authors\"]", "display_selector": "[data-display=\"authors\"]", "render_signal": null },
+    "年份": { "value_type": "number", "form_input": "[data-field=\"year\"]", "display_selector": "[data-display=\"year\"]", "render_signal": null },
+    "发表源": { "value_type": "select", "form_input": "[data-field=\"venue\"]", "display_selector": "[data-display=\"venue\"]", "render_signal": null, "options_value_key": "value" },
+    "分类": { "value_type": "multi_select", "form_input": "[data-field=\"cat\"]", "display_selector": "[data-display=\"cat\"]", "render_signal": null, "options_value_key": "value" },
+    "状态": { "value_type": "select", "form_input": "[data-field=\"status\"]", "display_selector": "[data-display=\"status\"]", "render_signal": null, "options_value_key": "value" },
+    "相关性": { "value_type": "select", "form_input": "[data-field=\"relevance\"]", "display_selector": "[data-display=\"relevance\"]", "render_signal": null, "options_value_key": "value" },
+    "一句话总结": { "value_type": "text", "form_input": "[data-field=\"oneliner\"]", "display_selector": "[data-display=\"oneliner\"]", "render_signal": null },
+    "关键词": { "value_type": "text", "form_input": "[data-field=\"keywords\"]", "display_selector": "[data-display=\"keywords\"]", "render_signal": null },
+    "中文结构化摘要": { "value_type": "text", "form_input": null, "display_selector": "[data-display=\"summary\"]", "render_signal": null },
+    "个人阅读体会": { "value_type": "text", "form_input": "[data-field=\"notes\"]", "display_selector": null, "render_signal": null },
+    "论文原文链接": { "value_type": "url", "form_input": "[data-field=\"paperlink\"]", "display_selector": "[data-display=\"paperlink\"]", "render_signal": null },
+    "结构化文档链接": { "value_type": "url", "form_input": null, "display_selector": "[data-display=\"doclink\"]", "render_signal": null },
+    "添加日期": { "value_type": "date", "form_input": null, "display_selector": "[data-display=\"adddate\"]", "render_signal": null },
+    "详细章节翻译(带图)": { "value_type": "text", "form_input": null, "display_selector": "[data-display=\"detail\"]", "render_signal": null },
+    "配图": { "value_type": "image", "form_input": null, "display_selector": "[data-display=\"figures\"]", "render_signal": null },
+    "核心创新点": { "value_type": "text", "form_input": "[data-field=\"innovation\"]", "display_selector": "[data-display=\"innovation\"]", "render_signal": null },
+    "方法关键": { "value_type": "text", "form_input": "[data-field=\"method\"]", "display_selector": "[data-display=\"method\"]", "render_signal": null },
+    "实验结论": { "value_type": "text", "form_input": "[data-field=\"experiment\"]", "display_selector": "[data-display=\"experiment\"]", "render_signal": null },
+    "局限与质疑": { "value_type": "text", "form_input": "[data-field=\"limit\"]", "display_selector": "[data-display=\"limit\"]", "render_signal": null },
+    "对我的启发": { "value_type": "text", "form_input": "[data-field=\"inspire\"]", "display_selector": "[data-display=\"inspire\"]", "render_signal": null }
+  },
+  "options_map": {
+    "发表源": { "j99Sd88sfcAg": { "text": "arXiv", "id": "j99Sd88sfcAg" }, "yxNSaCLNSlKf": { "text": "CVPR", "id": "yxNSaCLNSlKf" }, "2RZoSHRVVsQI": { "text": "ICCV", "id": "2RZoSHRVVsQI" }, "o8IDSpWOLqKn": { "text": "ECCV", "id": "o8IDSpWOLqKn" }, "G77LSSZFFTQr": { "text": "SIGGRAPH", "id": "G77LSSZFFTQr" }, "raZFyauFPyDJ": { "text": "其他顶会", "id": "raZFyauFPyDJ" }, "yGDwarndUeFj": { "text": "测绘SCI一区", "id": "yGDwarndUeFj" }, "1tmPrW7b4hdD": { "text": "其他期刊", "id": "1tmPrW7b4hdD" } },
+    "分类": { "h9ddIjOKYTHP": { "text": "训练加速", "id": "h9ddIjOKYTHP" }, "qS6PZT580GcN": { "text": "LiDAR+图像多模态融合", "id": "qS6PZT580GcN" }, "vTFEAEoblHd3": { "text": "几何质量增强", "id": "vTFEAEoblHd3" }, "3791Qp2WBtOx": { "text": "图像质量与伪影抑制", "id": "3791Qp2WBtOx" }, "Bji95fBVbIKr": { "text": "综述/其他", "id": "Bji95fBVbIKr" } },
+    "状态": { "xqhGu6KmKnJj": { "text": "待判断相关性", "id": "xqhGu6KmKnJj" }, "ooMBvM3v2ItF": { "text": "待精读", "id": "ooMBvM3v2ItF" }, "NnBwqru5OhXz": { "text": "已读已评价", "id": "NnBwqru5OhXz" } },
+    "相关性": { "aP7QUJ5WBfvR": { "text": "高", "id": "aP7QUJ5WBfvR" }, "tSxdIvRXyIaf": { "text": "中", "id": "tSxdIvRXyIaf" }, "a3Au6d1DLSyb": { "text": "低", "id": "a3Au6d1DLSyb" } }
+  },
+  "source": "agent_analysis",
+  "sdk_calls_found": true,
+  "existing_databases": [ { "id": "OJLJkCoJSkV3TdHWBVEjhH" }, { "id": "H2ElVIUQlDNgS1SxXD0A19" } ]
+}

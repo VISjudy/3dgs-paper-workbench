@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# WorkBuddy
+.workbuddy/
+
+# Local working files (待阅读区+总表临时构造、验证截图等)
+work/verify/
+work/seed_records.json
+work/paper_db_schema.json
+work/channels_schema.json
+work/channels_seed.json
+work/canonical_schema.json
+work/server_schema*.json
+work/pending_doc.md
+work/nav_doc.md
+work/3dgs-paper-workbench*.html
+work/server.log

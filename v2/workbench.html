@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>3DGS论文Review工作台 v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: #f5f7fa; color: #1e293b; font-size: 14px; line-height: 1.6;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 60px; }
+  header.top {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #0ea5e9 100%);
+    color: #fff; border-radius: 14px; padding: 24px 28px; margin-bottom: 18px;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, .18);
+  }
+  header.top h1 { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
+  header.top p { font-size: 13px; opacity: .92; margin-top: 6px; }
+  header.top .ver { font-size: 11px; opacity: .75; margin-top: 4px; font-family: monospace; }
+  nav.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  nav.tabs button {
+    border: 1px solid #cbd5e1; background: #fff; color: #334155;
+    padding: 9px 20px; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600;
+    transition: all .18s;
+  }
+  nav.tabs button:hover { border-color: #2563eb; color: #2563eb; }
+  nav.tabs button.active { background: #2563eb; border-color: #2563eb; color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.3); }
+  nav.tabs button .badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 6px; border-radius: 999px; background: #f59e0b; color: #fff; font-size: 11px; line-height: 17px; text-align: center; }
+  .btn {
+    display: inline-block; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all .15s;
+  }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-outline { background: #fff; color: #2563eb; border: 1px solid #bfdbfe; }
+  .btn-outline:hover { background: #eff6ff; }
+  .btn-green { background: #16a34a; color: #fff; }
+  .btn-green:hover { background: #15803d; }
+  .btn-amber { background: #f59e0b; color: #fff; }
+  .btn-amber:hover { background: #d97706; }
+  .btn-red { background: #ef4444; color: #fff; }
+  .btn-red:hover { background: #dc2626; }
+  .btn[disabled] { opacity: .55; cursor: not-allowed; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(15, 23, 42, .06); }
+  .card h2 { font-size: 16px; margin-bottom: 12px; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+  .card h2 .sub { font-size: 12px; color: #64748b; font-weight: 400; }
+
+  /* 概览 */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat { border-radius: 12px; padding: 16px 18px; color: #fff; position: relative; overflow: hidden; }
+  .stat .num { font-size: 30px; font-weight: 700; line-height: 1.1; }
+  .stat .lbl { font-size: 12px; opacity: .95; margin-top: 4px; }
+  .stat-pending { background: linear-gradient(135deg, #f59e0b, #f97316); }
+  .stat-toread { background: linear-gradient(135deg, #3b82f6, #0ea5e9); }
+  .stat-done { background: linear-gradient(135deg, #16a34a, #22c55e); }
+  .stat-total { background: linear-gradient(135deg, #475569, #64748b); }
+  .cats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .cat-chip {
+    background: #fff; border-radius: 10px; padding: 12px 14px; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all .15s;
+  }
+  .cat-chip:hover { border-color: #94a3b8; }
+  .cat-chip.on { outline: 2px solid #2563eb; }
+  .cat-dot { width: 10px; height: 10px; border-radius: 999px; flex: none; }
+  .cat-chip .cn { font-size: 18px; font-weight: 700; }
+  .cat-chip .cl { font-size: 11px; color: #64748b; }
+  .filterbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .fchip { border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; padding: 5px 14px; font-size: 12px; cursor: pointer; color: #475569; }
+  .fchip.on { background: #1e293b; color: #fff; border-color: #1e293b; }
+  .filterbar input[type=text] {
+    border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 12px; font-size: 13px; width: 220px; outline: none;
+  }
+  .filterbar input[type=text]:focus { border-color: #2563eb; }
+  ul.paperlist { list-style: none; }
+  ul.paperlist li {
+    border: 1px solid #e2e8f0; border-left-width: 4px; border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 10px; background: #fff; cursor: pointer; transition: box-shadow .15s;
+  }
+  ul.paperlist li:hover { box-shadow: 0 3px 10px rgba(15, 23, 42, .1); }
+  li.b-pending { border-left-color: #f59e0b; }
+  li.b-toread { border-left-color: #3b82f6; }
+  li.b-done { border-left-color: #16a34a; }
+  .p-title { font-weight: 700; font-size: 14.5px; color: #0f172a; }
+  .p-oneline { color: #475569; font-size: 13px; margin-top: 3px; }
+  .p-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 7px; }
+  .pill { font-size: 11px; padding: 2px 10px; border-radius: 999px; font-weight: 600; }
+  .pill-st-pending { background: #fff7ed; color: #b45309; }
+  .pill-st-toread { background: #eff6ff; color: #1d4ed8; }
+  .pill-st-done { background: #f0fdf4; color: #15803d; }
+  .tag { font-size: 11px; padding: 2px 9px; border-radius: 6px; background: #f1f5f9; color: #475569; }
+  .linkbtn { font-size: 12px; color: #2563eb; text-decoration: none; border: 1px solid #bfdbfe; padding: 2px 10px; border-radius: 6px; background: #f8fafc; }
+  .linkbtn:hover { background: #eff6ff; }
+  .empty { text-align: center; color: #94a3b8; padding: 40px 0; font-size: 13px; }
+
+  /* 添加论文表单 */
+  details.addform { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px 16px; background: #f8fafc; }
+  details.addform summary { cursor: pointer; font-weight: 700; color: #2563eb; font-size: 13.5px; }
+  .formgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 14px; margin-top: 14px; }
+  .fg label { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+  .fg input[type=text], .fg input[type=number], .fg select, .fg textarea {
+    width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px; font-size: 13px; font-family: inherit; outline: none; background: #fff;
+  }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: #2563eb; }
+  .catbox { display: flex; flex-wrap: wrap; gap: 6px; }
+  .catbox label { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; background: #fff; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 999px; cursor: pointer; font-weight: 400; }
+  .formactions { margin-top: 12px; display: flex; gap: 10px; }
+
+  /* 阅读模式 */
+  .readcols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 980px) { .readcols { grid-template-columns: 1fr; } }
+  .rpick { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .rpick select { border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; min-width: 320px; max-width: 100%; }
+  .rhead { border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px; }
+  .rhead h3 { font-size: 17px; color: #0f172a; }
+  .rhead .meta { color: #64748b; font-size: 12.5px; margin-top: 5px; }
+  .left-section-title { font-size: 13px; font-weight: 700; color: #1e40af; margin: 10px 0 6px; display: flex; align-items: center; gap: 6px; }
+  .left-section-title .icon { font-size: 14px; }
+  .sumbody p { margin: 7px 0; color: #334155; font-size: 13.5px; }
+  .sumbody h4 { margin: 14px 0 4px; font-size: 13.5px; color: #1d4ed8; background: #eff6ff; display: inline-block; padding: 2px 10px; border-radius: 6px; }
+  .detail-scroll { max-height: 560px; overflow-y: auto; padding: 14px 16px; background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 10px; }
+  .detail-scroll::-webkit-scrollbar { width: 8px; }
+  .detail-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .detail-scroll h3 { font-size: 16px; color: #1e3a8a; margin: 14px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #dbeafe; }
+  .detail-scroll h4 { font-size: 14.5px; color: #1d4ed8; margin: 12px 0 6px; }
+  .detail-scroll h5 { font-size: 13.5px; color: #2563eb; margin: 10px 0 4px; font-weight: 700; }
+  .detail-scroll p { margin: 6px 0; color: #334155; font-size: 13.5px; }
+  .detail-scroll ul { margin: 6px 0 6px 22px; color: #334155; font-size: 13.5px; }
+  .detail-scroll li { margin: 3px 0; }
+  .detail-scroll img { max-width: 100%; height: auto; display: block; margin: 10px auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  .fig-gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px; background: #f8fafc; border-radius: 8px; }
+  .fig-gallery img { max-width: 160px; max-height: 110px; object-fit: contain; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; background: #fff; }
+
+  /* 笔记5格 */
+  .note-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .note-grid .full { grid-column: 1 / -1; }
+  .note-cell { border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; background: #fafbfc; }
+  .note-cell label { display: block; font-size: 12px; color: #1e40af; font-weight: 700; margin-bottom: 4px; }
+  .note-cell label .num { display: inline-block; width: 18px; height: 18px; line-height: 18px; text-align: center; background: #2563eb; color: #fff; border-radius: 50%; font-size: 11px; margin-right: 5px; }
+  .note-cell textarea { width: 100%; min-height: 80px; border: none; background: transparent; font-size: 13px; font-family: inherit; resize: vertical; outline: none; padding: 2px 0; }
+  .notes-hint { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 8px 12px; font-size: 12px; color: #92400e; margin-bottom: 12px; }
+  textarea.notes-extra { width: 100%; min-height: 70px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; font-family: inherit; outline: none; }
+  .notectrl { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+  .notectrl select { border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px; font-size: 13px; }
+  .notectrl .lbl { font-size: 12px; color: #64748b; font-weight: 600; }
+
+  /* 思维导图 */
+  .maplegend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: #475569; margin-bottom: 10px; align-items: center; }
+  .lgdot { display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 4px; vertical-align: -1px; }
+  .mapbox { overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+  .mapbox svg { display: block; }
+  .mm-node { cursor: pointer; }
+  .mm-node:hover rect { filter: brightness(.94); }
+
+  /* 写作模块 */
+  .write-input { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .write-input input[type=text] { flex: 1; min-width: 280px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 14px; outline: none; }
+  .write-input input[type=text]:focus { border-color: #2563eb; }
+  .draftout {
+    border: 1px solid #e2e8f0; border-radius: 10px; background: #fffdf5; padding: 20px 24px;
+    font-size: 13.5px; white-space: pre-wrap; color: #292524; max-height: 640px; overflow: auto;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.8;
+  }
+  .write-tip { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; border-radius: 10px; padding: 10px 14px; font-size: 12.5px; margin-bottom: 12px; }
+
+  /* 搜索模块 */
+  .channeltable { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .channeltable th { text-align: left; padding: 8px 10px; background: #f1f5f9; font-size: 12px; color: #475569; font-weight: 700; border-bottom: 1px solid #e2e8f0; }
+  .channeltable td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .channeltable tr:hover { background: #f8fafc; }
+  .pill-on { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .pill-off { background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .searchbox-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .searchbox-panel { grid-template-columns: 1fr; } }
+  textarea.searchprompt { width: 100%; min-height: 180px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; font-family: monospace; font-size: 12.5px; resize: vertical; outline: none; }
+  .recentlist { list-style: none; max-height: 480px; overflow-y: auto; }
+  .recentlist li { padding: 10px 12px; border: 1px solid #e2e8f0; border-left: 3px solid #f59e0b; border-radius: 8px; margin-bottom: 8px; background: #fff; }
+  .recentlist .rt { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .recentlist .rm { font-size: 12px; color: #64748b; margin-top: 3px; }
+  .recentlist .ra { font-size: 12px; color: #475569; margin-top: 4px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px);
+    background: #0f172a; color: #fff; padding: 10px 22px; border-radius: 999px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: all .25s; z-index: 99;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .sdkwarn {
+    background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 16px; font-size: 13px;
+  }
+  .hidden { display: none !important; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
+  .modal { background: #fff; border-radius: 14px; padding: 24px; width: 560px; max-width: 92%; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
+  .modal h3 { margin-bottom: 14px; font-size: 16px; }
+  .modal .formgrid { margin-top: 0; }
+  .modal .formactions { justify-content: flex-end; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>📚 3DGS 论文 Review 工作台</h1>
+    <p>lidar-img-3DGS 论文资料库 · 地面/手持 LiDAR + 彩色图像 3DGS 三维重建 · 训练加速 / 多模态融合 / 几何增强 / 图像质量</p>
+    <div class="ver">v2 · 详细翻译+配图 · 5格结构化笔记 · 搜索渠道管理</div>
+  </header>
+
+  <div id="sdkwarn" class="sdkwarn hidden">⚠️ 当前环境无法连接资料库数据表，请在 WorkBuddy 资料库中打开本页面以启用数据读写。</div>
+
+  <nav class="tabs">
+    <button type="button" data-tab="overview" class="active">📊 概览 <span class="badge" id="nav-badge" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH">0</span></button>
+    <button type="button" data-tab="read">📖 阅读模式</button>
+    <button type="button" data-tab="map">🗺️ 思维导图</button>
+    <button type="button" data-tab="write">✍️ 论文写作</button>
+    <button type="button" data-tab="search">🔍 论文抓取</button>
+    <button type="button" id="btn-refresh" class="btn btn-outline" style="margin-left:auto;">↻ 刷新数据</button>
+  </nav>
+
+  <!-- ===================== 模块1 概览 ===================== -->
+  <section id="tab-overview">
+    <div class="stats">
+      <div class="stat stat-pending"><div class="num" id="st-pending" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH">–</div><div class="lbl">待判断相关性</div></div>
+      <div class="stat stat-toread"><div class="num" id="st-toread" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH">–</div><div class="lbl">待精读</div></div>
+      <div class="stat stat-done"><div class="num" id="st-done" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH">–</div><div class="lbl">已读已评价</div></div>
+      <div class="stat stat-total"><div class="num" id="st-total" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH">–</div><div class="lbl">论文总数</div></div>
+    </div>
+
+    <div class="card">
+      <h2>🏷️ 分类分布 <span class="sub">点击可筛选下方列表</span></h2>
+      <div class="cats-row" id="cats-row"></div>
+    </div>
+
+    <div class="card">
+      <h2>📄 论文列表 <span class="sub" id="list-count" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span></h2>
+      <div class="filterbar">
+        <span class="fchip on" data-fstatus="全部">全部状态</span>
+        <span class="fchip" data-fstatus="待判断相关性">🟠 待判断</span>
+        <span class="fchip" data-fstatus="待精读">🔵 待精读</span>
+        <span class="fchip" data-fstatus="已读已评价">🟢 已读已评价</span>
+        <input type="text" id="searchbox" placeholder="🔍 搜索标题 / 关键词 / 总结…" />
+      </div>
+      <ul class="paperlist" id="paperlist"></ul>
+      <details class="addform">
+        <summary>➕ 手动添加论文到资料库</summary>
+        <div class="formgrid">
+          <div class="fg"><label>论文标题 *</label><input type="text" data-field="title" placeholder="Paper title" /></div>
+          <div class="fg"><label>作者/机构</label><input type="text" data-field="authors" placeholder="如：Zhang et al.（PKU）" /></div>
+          <div class="fg"><label>年份</label><input type="number" data-field="year" placeholder="2026" min="1900" max="2100" /></div>
+          <div class="fg"><label>发表源</label><select data-field="venue"><option value="">请选择</option></select></div>
+          <div class="fg"><label>状态</label><select data-field="status"><option value="">请选择</option></select></div>
+          <div class="fg"><label>相关性</label><select data-field="relevance"><option value="">请选择</option></select></div>
+          <div class="fg" style="grid-column: 1 / -1;"><label>分类（可多选）</label><div class="catbox" data-field="cat"></div></div>
+          <div class="fg" style="grid-column: 1 / -1;"><label>一句话总结</label><input type="text" data-field="oneliner" placeholder="用一句话概括这篇论文做了什么" /></div>
+          <div class="fg"><label>关键词</label><input type="text" data-field="keywords" placeholder="分号分隔" /></div>
+          <div class="fg"><label>论文原文链接</label><input type="text" data-field="paperlink" placeholder="https://arxiv.org/abs/…" /></div>
+        </div>
+        <div class="formactions">
+          <button type="button" class="btn btn-primary" id="btn-addpaper">提交入库</button>
+          <span style="font-size:12px;color:#64748b;align-self:center;">中文结构化摘要、详细翻译、配图、笔记可稍后由翻译skill补充或在阅读模式编辑</span>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===================== 模块2 阅读模式 ===================== -->
+  <section id="tab-read" class="hidden">
+    <div class="card">
+      <div class="rpick">
+        <span style="font-weight:700;">选择论文：</span>
+        <select id="readpicker"><option value="">— 请选择要阅读的论文 —</option></select>
+      </div>
+      <div class="readcols">
+        <!-- 左栏：双部分 -->
+        <div class="card" style="margin-bottom:0;">
+          <h2>📄 论文阅读 <span class="sub">左 = 概要 + 详细翻译（带图）</span></h2>
+          <div id="read-empty" class="empty">从上方选择论文，或回到概览点击论文卡片进入阅读</div>
+          <div id="read-body" class="hidden">
+            <div class="rhead">
+              <h3 data-display="title" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH">–</h3>
+              <div class="meta">
+                <span data-display="authors" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span>
+                · <span data-display="year" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span>
+                · <span data-display="venue" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span>
+                · 添加于 <span data-display="adddate" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span>
+              </div>
+              <div class="meta">
+                分类：<span data-display="cat" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span>
+                · 关键词：<span data-display="keywords" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></span>
+                · <a id="read-paperlink" class="linkbtn" href="#" target="_blank" rel="noopener">查看原文 ↗</a>
+                <a id="read-doclink" class="linkbtn hidden" href="#" target="_blank" rel="noopener">结构化文档 ↗</a>
+              </div>
+            </div>
+            <!-- 概要部分 -->
+            <div class="left-section-title"><span class="icon">📌</span> 概要式总结 <span style="color:#94a3b8;font-weight:400;">（由论文结构化翻译skill生成，含数据类型、数据集、输出指标）</span></div>
+            <div class="sumbody" id="summary-body" data-display="summary" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></div>
+
+            <!-- 详细翻译部分 -->
+            <div class="left-section-title"><span class="icon">📖</span> 详细章节翻译 <span style="color:#94a3b8;font-weight:400;">（按原文章节压缩，含图，滚轮可下滑）</span></div>
+            <div id="figures-gallery" data-display="figures" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></div>
+            <div class="detail-scroll" id="detail-body" data-display="detail" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></div>
+          </div>
+        </div>
+
+        <!-- 右栏：5格结构化笔记 + 自由备注 -->
+        <div class="card" style="margin-bottom:0;">
+          <h2>📝 我的阅读笔记 <span class="sub">5个结构化格子 + 自由备注 · 自动保存到论文总表</span></h2>
+          <div class="notes-hint">📖 按 ① 核心创新点 → ⑤ 对我的启发 顺序记录，每格独立保存。提交时统一写回总表。</div>
+          <div id="notes-empty" class="empty">请先在左侧选择论文</div>
+          <div id="notes-body" class="hidden">
+            <div class="notectrl">
+              <span class="lbl">状态</span><select data-field="status" id="notes-status"><option value="">请选择</option></select>
+              <span class="lbl">相关性</span><select data-field="relevance" id="notes-relevance"><option value="">请选择</option></select>
+            </div>
+            <div class="notectrl">
+              <button type="button" class="btn btn-amber" id="btn-approve">✅ 相关，加入资料库（转为待精读）</button>
+              <button type="button" class="btn btn-green" id="btn-finish">🎓 标记已读已评价</button>
+            </div>
+            <div class="note-grid">
+              <div class="note-cell"><label><span class="num">1</span>核心创新点</label><textarea data-field="innovation" data-display="innovation" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH" placeholder="与已有方法相比，新在哪里？"></textarea></div>
+              <div class="note-cell"><label><span class="num">2</span>方法关键</label><textarea data-field="method" data-display="method" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH" placeholder="核心技术路线 / 关键公式 / 主要假设？"></textarea></div>
+              <div class="note-cell"><label><span class="num">3</span>实验结论</label><textarea data-field="experiment" data-display="experiment" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH" placeholder="在哪些数据集上验证？提升幅度？"></textarea></div>
+              <div class="note-cell"><label><span class="num">4</span>局限与质疑</label><textarea data-field="limit" data-display="limit" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH" placeholder="什么场景会失效？评价是否公允？"></textarea></div>
+              <div class="note-cell full"><label><span class="num">5</span>对我的启发</label><textarea data-field="inspire" data-display="inspire" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH" placeholder="能否用于 LiDAR+图像 3DGS 场景？可借鉴/可改进之处？"></textarea></div>
+            </div>
+            <div class="formactions" style="margin-top:12px;">
+              <button type="button" class="btn btn-primary" id="btn-savenotes">💾 保存笔记</button>
+              <span style="font-size:12px;color:#64748b;align-self:center;">保存后自动更新总表状态与相关性</span>
+            </div>
+            <details style="margin-top:12px;">
+              <summary style="cursor:pointer;font-size:12px;color:#64748b;">📝 自由备注（个人阅读体会）</summary>
+              <textarea data-field="notes" id="notes-extra" class="notes-extra" style="margin-top:8px;" placeholder="任何不想分到上述5格的自由想法..."></textarea>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 模块3 思维导图 ===================== -->
+  <section id="tab-map" class="hidden">
+    <div class="card">
+      <h2>🗺️ 论文思维导图 <span class="sub">中心 → 研究方向 → 论文（按状态着色，点击论文进入阅读）</span></h2>
+      <div class="maplegend">
+        <span><span class="lgdot" style="background:#f59e0b"></span>待判断相关性</span>
+        <span><span class="lgdot" style="background:#3b82f6"></span>待精读</span>
+        <span><span class="lgdot" style="background:#16a34a"></span>已读已评价</span>
+        <span style="color:#94a3b8;">｜</span>
+        <span>分支颜色 = 研究方向</span>
+      </div>
+      <div class="mapbox" id="mapbox"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 模块4 论文写作 ===================== -->
+  <section id="tab-write" class="hidden">
+    <div class="card">
+      <h2>✍️ 学术论文写作助手 <span class="sub">基于资料库生成 摘要 / 引言 / 国内外研究现状 草稿骨架</span></h2>
+      <div class="write-tip">
+        💡 输入你要写的论文方向，系统会从资料库中组织文献素材，生成结构化写作草稿。草稿是「骨架 + 素材清单」，
+        复制后粘贴到与 WorkBuddy 的对话中（使用「学术论文写作」skill），可继续深度打磨成文。
+      </div>
+      <div class="write-input">
+        <input type="text" id="write-topic" placeholder="例如：面向地面手持LiDAR与彩色图像融合的高效高保真3DGS重建" />
+        <button type="button" class="btn btn-primary" id="btn-gen">⚡ 生成写作草稿</button>
+      </div>
+      <div id="write-empty" class="empty">输入论文方向后点击生成</div>
+      <div id="write-out-wrap" class="hidden">
+        <div class="formactions" style="margin-bottom:10px;">
+          <button type="button" class="btn btn-outline" id="btn-copydraft">📋 复制全文</button>
+        </div>
+        <div class="draftout" id="draftout" data-sp-bindable="database" data-sp-database-id="OJLJkCoJSkV3TdHWBVEjhH"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 模块5 论文抓取/搜索 ===================== -->
+  <section id="tab-search" class="hidden">
+    <div class="card">
+      <h2>🔍 搜索渠道管理 <span class="sub">在「论文搜索渠道」database（ID=H2ElVIUQlDNgS1SxXD0A19）中增删改；每日自动化任务按启用渠道推送</span></h2>
+      <div class="formactions" style="margin-bottom:10px;">
+        <button type="button" class="btn btn-primary" id="btn-addchannel">➕ 添加新渠道</button>
+        <span style="font-size:12px;color:#64748b;align-self:center;">修改后自动保存到搜索渠道表</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="channeltable" id="channeltable">
+          <thead>
+            <tr><th>渠道</th><th>类型</th><th>URL/API</th><th>默认关键词</th><th>推送数</th><th>启用</th><th>操作</th></tr>
+          </thead>
+          <tbody id="channeltbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="searchbox-panel">
+      <div class="card">
+        <h2>🔎 主动搜索 <span class="sub">生成搜索指令，粘贴到对话触发搜索skill</span></h2>
+        <div class="formgrid" style="margin-top:0;">
+          <div class="fg" style="grid-column: 1 / -1;"><label>关键词（多个用空格或+号分隔）</label><input type="text" id="search-kw" placeholder="3D Gaussian Splatting LiDAR fusion" /></div>
+          <div class="fg"><label>渠道过滤（留空=全部启用）</label><select id="search-chtype"><option value="">全部</option><option value="arXiv">arXiv</option><option value="计算机顶会">计算机顶会</option><option value="测绘SCI一区">测绘SCI一区</option><option value="RSS">RSS</option><option value="其他">其他</option></select></div>
+          <div class="fg"><label>最相关篇数</label><input type="number" id="search-top" min="1" max="20" value="5" /></div>
+        </div>
+        <div class="formactions">
+          <button type="button" class="btn btn-primary" id="btn-genprompt">⚡ 生成搜索指令</button>
+          <button type="button" class="btn btn-outline" id="btn-copyprompt">📋 复制指令</button>
+        </div>
+        <textarea class="searchprompt" id="search-prompt" style="margin-top:12px;" placeholder="点击「生成搜索指令」在此生成可粘贴到对话的prompt"></textarea>
+        <div style="margin-top:8px;font-size:12px;color:#64748b;">💡 把这段指令粘贴到与 WorkBuddy 的对话中，会自动调用「3dgs每日论文搜索」skill 跑搜索+入库。</div>
+      </div>
+
+      <div class="card">
+        <h2>📥 近期推送记录 <span class="sub">按 状态=待判断相关性 + 添加日期倒序，最多30条</span></h2>
+        <ul class="recentlist" id="recentlist"></ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 添加/编辑渠道的模态框 -->
+<div class="modal-bg hidden" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-title">添加搜索渠道</h3>
+    <div class="formgrid">
+      <div class="fg"><label>渠道名称 *</label><input type="text" id="ch-name" /></div>
+      <div class="fg"><label>渠道类型 *</label><select id="ch-type"><option value="">请选择</option></select></div>
+      <div class="fg" style="grid-column:1/-1;"><label>搜索URL/API</label><input type="text" id="ch-url" placeholder="含 {query} 占位符或完整URL" /></div>
+      <div class="fg"><label>默认关键词</label><input type="text" id="ch-keywords" /></div>
+      <div class="fg"><label>每日推送数量</label><input type="number" id="ch-qty" min="1" max="20" value="3" /></div>
+      <div class="fg"><label>启用</label><select id="ch-enabled"><option value="true">✅ 启用</option><option value="false">⛔ 禁用</option></select></div>
+      <div class="fg" style="grid-column:1/-1;"><label>备注</label><input type="text" id="ch-note" /></div>
+    </div>
+    <div class="formactions">
+      <button type="button" class="btn btn-outline" id="modal-cancel">取消</button>
+      <button type="button" class="btn btn-primary" id="modal-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var DATABASE_ID = 'OJLJkCoJSkV3TdHWBVEjhH';
+  var CHANNELS_DB_ID = 'H2ElVIUQlDNgS1SxXD0A19';
+  var db = null;
+  var SCHEMA_OPTIONS = {};
+  var SCHEMA_OPTIONS_CH = {};
+  var ALL_RECORDS = [];
+  var ALL_CHANNELS = [];
+  var CURRENT_ID = null;
+  var EDITING_CH_ID = null;
+  var FILTER_STATUS = '全部';
+  var FILTER_CAT = null;
+  var SEARCH = '';
+  var CACHE_KEY_FORM = 'wb_3dgs_paper_form_v2';
+
+  var CATS = ['训练加速', 'LiDAR+图像多模态融合', '几何质量增强', '图像质量与伪影抑制', '综述/其他'];
+  var CAT_COLORS = { '训练加速': '#8b5cf6', 'LiDAR+图像多模态融合': '#0ea5e9', '几何质量增强': '#10b981', '图像质量与伪影抑制': '#f59e0b', '综述/其他': '#64748b' };
+  var ST_CLASS = { '待判断相关性': 'pending', '待精读': 'toread', '已读已评价': 'done' };
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { if (s === null || s === undefined) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function bindable(el) { try { el.setAttribute('data-sp-bindable','database'); el.setAttribute('data-sp-database-id', DATABASE_ID); } catch (e) {} return el; }
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.className = 'toast show'; setTimeout(function () { t.className = 'toast'; }, 2200); }
+  function todayStr() { var d = new Date(); var m = d.getMonth() + 1, day = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day); }
+  function optId(field, text) { var opts = SCHEMA_OPTIONS[field] || []; for (var i = 0; i < opts.length; i++) { if (opts[i].text === text) return opts[i].id; } return text; }
+  function recCats(r) { var v = r['分类']; if (!v || !v.length) return ['综述/其他']; return v; }
+  function recStatus(r) { return r['状态'] || '待判断相关性'; }
+
+  function init() {
+    if (window.__SMART_PAGE__ && window.__SMART_PAGE__.database) {
+      db = window.__SMART_PAGE__.database;
+    } else { $('sdkwarn').classList.remove('hidden'); return; }
+    try {
+      var p1 = db.getSchema({ databaseId: DATABASE_ID }).then(function (schema) {
+        var props = (schema && schema.properties) || [];
+        for (var i = 0; i < props.length; i++) {
+          var p = props[i];
+          if (p.type === 'select' || p.type === 'multi_select') SCHEMA_OPTIONS[p.name] = (p.config && p.config.options) || [];
+        }
+      });
+      var p2 = db.getSchema({ databaseId: 'H2ElVIUQlDNgS1SxXD0A19' }).then(function (schema) {
+        var props = (schema && schema.properties) || [];
+        for (var j = 0; j < props.length; j++) {
+          var p = props[j];
+          if (p.type === 'select' || p.type === 'multi_select') SCHEMA_OPTIONS_CH[p.name] = (p.config && p.config.options) || [];
+        }
+      });
+      Promise.all([p1, p2]).then(function () {
+        renderSelectOptions();
+        fillChannelTypeSelect();
+        restoreFormCache();
+        return refreshData();
+      }).catch(function () { $('sdkwarn').classList.remove('hidden'); });
+    } catch (e) { $('sdkwarn').classList.remove('hidden'); }
+  }
+
+  function refreshData() {
+    ALL_RECORDS = []; ALL_CHANNELS = [];
+    function page(cursor) {
+      return db.query({ databaseId: DATABASE_ID, pageSize: 100, startCursor: cursor }).then(function (res) {
+        var results = (res && res.results) || [];
+        for (var i = 0; i < results.length; i++) ALL_RECORDS.push(results[i]);
+        if (res && res.hasMore && res.nextCursor) return page(res.nextCursor);
+        return ALL_RECORDS;
+      });
+    }
+    function pageCh() {
+      return db.query({ databaseId: 'H2ElVIUQlDNgS1SxXD0A19', pageSize: 100 }).then(function (res) {
+        var results = (res && res.results) || [];
+        for (var i = 0; i < results.length; i++) ALL_CHANNELS.push(results[i]);
+      });
+    }
+    return Promise.all([page(null), pageCh()]).then(function () {
+      renderOverview(); renderPicker(); renderMindmap();
+      if (CURRENT_ID) {
+        var found = null;
+        for (var i = 0; i < ALL_RECORDS.length; i++) { if (ALL_RECORDS[i]._id === CURRENT_ID) found = ALL_RECORDS[i]; }
+        if (found) renderReading(found); else CURRENT_ID = null;
+      }
+      renderChannels(); renderRecentPushed();
+      toast('数据已刷新');
+    }).catch(function () { toast('读取数据失败'); });
+  }
+
+  function renderSelectOptions() {
+    function fillSelect(sel, field) {
+      if (!sel) return;
+      var opts = SCHEMA_OPTIONS[field] || [];
+      var html = '<option value="">请选择</option>';
+      for (var i = 0; i < opts.length; i++) html += '<option value="' + esc(opts[i].id) + '">' + esc(opts[i].text) + '</option>';
+      sel.innerHTML = html;
+    }
+    var sels = document.querySelectorAll('[data-field="venue"]');
+    for (var i = 0; i < sels.length; i++) fillSelect(sels[i], '发表源');
+    var sts = document.querySelectorAll('[data-field="status"]');
+    for (var j = 0; j < sts.length; j++) fillSelect(sts[j], '状态');
+    var rs = document.querySelectorAll('[data-field="relevance"]');
+    for (var k = 0; k < rs.length; k++) fillSelect(rs[k], '相关性');
+    var catbox = document.querySelector('[data-field="cat"]');
+    if (catbox) {
+      var copts = SCHEMA_OPTIONS['分类'] || [];
+      var h = '';
+      for (var m = 0; m < copts.length; m++) h += '<label><input type="checkbox" name="wb-cat" value="' + esc(copts[m].id) + '" />' + esc(copts[m].text) + '</label>';
+      catbox.innerHTML = h;
+    }
+    var crows = $('cats-row');
+    if (crows) {
+      var hh = '';
+      for (var c = 0; c < CATS.length; c++) {
+        hh += '<div class="cat-chip" data-cat="' + esc(CATS[c]) + '"><span class="cat-dot" style="background:' + CAT_COLORS[CATS[c]] + '"></span><div><div class="cn" data-catnum="' + esc(CATS[c]) + '">0</div><div class="cl">' + esc(CATS[c]) + '</div></div></div>';
+      }
+      crows.innerHTML = hh;
+      var chips = crows.querySelectorAll('.cat-chip');
+      for (var n = 0; n < chips.length; n++) {
+        chips[n].onclick = function () {
+          var cat = this.getAttribute('data-cat');
+          FILTER_CAT = (FILTER_CAT === cat) ? null : cat;
+          for (var x = 0; x < chips.length; x++) chips[x].classList.remove('on');
+          if (FILTER_CAT) this.classList.add('on');
+          renderPaperList();
+        };
+      }
+    }
+  }
+  function fillChannelTypeSelect() {
+    var sel = $('ch-type');
+    if (!sel) return;
+    var opts = SCHEMA_OPTIONS_CH['渠道类型'] || [];
+    var h = '<option value="">请选择</option>';
+    for (var i = 0; i < opts.length; i++) h += '<option value="' + esc(opts[i].id) + '">' + esc(opts[i].text) + '</option>';
+    sel.innerHTML = h;
+  }
+
+  function renderOverview() {
+    var nP=0,nT=0,nD=0; var cc = {};
+    for (var c = 0; c < CATS.length; c++) cc[CATS[c]] = 0;
+    for (var i = 0; i < ALL_RECORDS.length; i++) {
+      var st = recStatus(ALL_RECORDS[i]);
+      if (st==='待判断相关性') nP++; else if (st==='待精读') nT++; else if (st==='已读已评价') nD++;
+      var cs = recCats(ALL_RECORDS[i]);
+      for (var j = 0; j < cs.length; j++) if (cc[cs[j]] !== undefined) cc[cs[j]]++;
+    }
+    $('st-pending').textContent = nP; $('st-toread').textContent = nT; $('st-done').textContent = nD; $('st-total').textContent = ALL_RECORDS.length; $('nav-badge').textContent = nP;
+    var nums = document.querySelectorAll('[data-catnum]');
+    for (var k = 0; k < nums.length; k++) { var cn = nums[k].getAttribute('data-catnum'); nums[k].textContent = cc[cn] || 0; bindable(nums[k]); }
+    renderPaperList();
+  }
+
+  function renderPaperList() {
+    var list = $('paperlist');
+    var shown = [];
+    for (var i = 0; i < ALL_RECORDS.length; i++) {
+      var r = ALL_RECORDS[i];
+      if (FILTER_STATUS !== '全部' && recStatus(r) !== FILTER_STATUS) continue;
+      if (FILTER_CAT && recCats(r).indexOf(FILTER_CAT) < 0) continue;
+      if (SEARCH) {
+        var hay = ((r['论文标题'] || '') + ' ' + (r['关键词'] || '') + ' ' + (r['一句话总结'] || '')).toLowerCase();
+        if (hay.indexOf(SEARCH.toLowerCase()) < 0) continue;
+      }
+      shown.push(r);
+    }
+    $('list-count').textContent = '共 ' + shown.length + ' 篇' + (FILTER_CAT ? ' · ' + FILTER_CAT : '') + (FILTER_STATUS !== '全部' ? ' · ' + FILTER_STATUS : '');
+    if (!shown.length) { list.innerHTML = '<div class="empty">暂无论文。点击下方"手动添加论文"，或等待每日自动搜索入库。</div>'; return; }
+    var html = '';
+    for (var j = 0; j < shown.length; j++) {
+      var p = shown[j];
+      var stc = ST_CLASS[recStatus(p)] || 'pending';
+      var tags = '';
+      var cs = recCats(p);
+      for (var t = 0; t < cs.length; t++) tags += '<span class="tag" style="color:' + CAT_COLORS[cs[t]] + ';border:1px solid ' + CAT_COLORS[cs[t]] + '33;">' + esc(cs[t]) + '</span>';
+      var link = '';
+      if (p['论文原文链接'] && p['论文原文链接'].link) link = '<a class="linkbtn" href="' + esc(p['论文原文链接'].link) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">原文 ↗</a>';
+      html += '<li class="b-' + stc + '" data-rid="' + esc(p._id) + '">' +
+        '<div class="p-title">' + esc(p['论文标题'] || '未命名') + '</div>' +
+        '<div class="p-oneline">' + esc(p['一句话总结'] || '') + '</div>' +
+        '<div class="p-meta">' +
+        '<span class="pill pill-st-' + stc + '">' + esc(recStatus(p)) + '</span>' +
+        '<span class="tag">' + esc(p['发表源'] || '未知来源') + '</span>' +
+        '<span class="tag">' + esc(p['年份'] || '') + '</span>' +
+        (p['相关性'] ? '<span class="tag">相关度：' + esc(p['相关性']) + '</span>' : '') +
+        tags + link +
+        '</div></li>';
+    }
+    list.innerHTML = html;
+    var lis = list.querySelectorAll('li');
+    for (var m = 0; m < lis.length; m++) lis[m].onclick = function () { openReading(this.getAttribute('data-rid')); };
+  }
+
+  /* 添加论文表单 */
+  function cacheForm() {
+    try {
+      var data = {}; var box = document.querySelector('details.addform');
+      if (!box) return;
+      var inputs = box.querySelectorAll('input[data-field], select[data-field]');
+      for (var i = 0; i < inputs.length; i++) { if (inputs[i].type === 'checkbox') continue; if (inputs[i].value) data[inputs[i].getAttribute('data-field')] = inputs[i].value; }
+      var cbs = box.querySelectorAll('input[name="wb-cat"]:checked');
+      if (cbs.length) { var arr = []; for (var j = 0; j < cbs.length; j++) arr.push(cbs[j].value); data['__cats'] = arr; }
+      localStorage.setItem(CACHE_KEY_FORM, JSON.stringify(data));
+    } catch (e) {}
+  }
+  var cacheTimer = null;
+  function debounceCache() { if (cacheTimer) clearTimeout(cacheTimer); cacheTimer = setTimeout(cacheForm, 300); }
+  function restoreFormCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY_FORM); if (!raw) return;
+      var data = JSON.parse(raw); var box = document.querySelector('details.addform'); if (!box) return;
+      for (var key in data) { if (key === '__cats') continue; var el = box.querySelector('[data-field="' + key + '"]'); if (el && data[key]) el.value = data[key]; }
+      if (data['__cats']) { var cbs = box.querySelectorAll('input[name="wb-cat"]'); for (var i = 0; i < cbs.length; i++) if (data['__cats'].indexOf(cbs[i].value) >= 0) cbs[i].checked = true; }
+    } catch (e) {}
+  }
+  function clearFormCache() { try { localStorage.removeItem(CACHE_KEY_FORM); } catch (e) {} }
+
+  function submitPaper() {
+    var box = document.querySelector('details.addform');
+    var title = (box.querySelector('[data-field="title"]').value || '').trim();
+    if (!title) { toast('请填写论文标题'); return; }
+    var props = {};
+    props['论文标题'] = { text: title };
+    var authors = box.querySelector('[data-field="authors"]').value.trim(); if (authors) props['作者/机构'] = { text: authors };
+    var year = box.querySelector('[data-field="year"]').value.trim(); if (year) props['年份'] = { number: parseInt(year, 10) || 0 };
+    var venue = box.querySelector('[data-field="venue"]').value; if (venue) props['发表源'] = { select: venue };
+    var catIds = []; var cbs = box.querySelectorAll('input[name="wb-cat"]:checked'); for (var i = 0; i < cbs.length; i++) catIds.push(cbs[i].value);
+    if (catIds.length) props['分类'] = { multi_select: catIds };
+    var status = box.querySelector('[data-field="status"]').value;
+    props['状态'] = { select: status || optId('状态','待判断相关性') };
+    var rel = box.querySelector('[data-field="relevance"]').value; if (rel) props['相关性'] = { select: rel };
+    var oneliner = box.querySelector('[data-field="oneliner"]').value.trim(); if (oneliner) props['一句话总结'] = { text: oneliner };
+    var kws = box.querySelector('[data-field="keywords"]').value.trim(); if (kws) props['关键词'] = { text: kws };
+    var link = box.querySelector('[data-field="paperlink"]').value.trim(); if (link) props['论文原文链接'] = { url: { text: '原文', link: link } };
+    props['添加日期'] = { date: todayStr() };
+    var btn = $('btn-addpaper'); btn.disabled = true;
+    try {
+      db.addRecord({ databaseId: DATABASE_ID, properties: props }).then(function () {
+        btn.disabled = false; clearFormCache();
+        var els = box.querySelectorAll('input[data-field], select[data-field]');
+        for (var j = 0; j < els.length; j++) { if (els[j].type !== 'checkbox') els[j].value = ''; }
+        var cbs2 = box.querySelectorAll('input[name="wb-cat"]'); for (var k = 0; k < cbs2.length; k++) cbs2[k].checked = false;
+        toast('已入库：' + title); refreshData();
+      }).catch(function () { btn.disabled = false; toast('入库失败'); });
+    } catch (e) { btn.disabled = false; toast('入库失败'); }
+  }
+
+  /* 阅读模式 */
+  function renderPicker() {
+    var sel = $('readpicker');
+    var cur = CURRENT_ID;
+    var html = '<option value="">— 请选择要阅读的论文 —</option>';
+    for (var i = 0; i < ALL_RECORDS.length; i++) {
+      var r = ALL_RECORDS[i];
+      html += '<option value="' + esc(r._id) + '">[' + esc(recStatus(r)) + '] ' + esc((r['论文标题'] || '未命名').slice(0, 60)) + '</option>';
+    }
+    sel.innerHTML = html;
+    if (cur) sel.value = cur;
+  }
+
+  function openReading(rid) {
+    CURRENT_ID = rid; switchTab('read');
+    var found = null;
+    for (var i = 0; i < ALL_RECORDS.length; i++) if (ALL_RECORDS[i]._id === rid) found = ALL_RECORDS[i];
+    if (found) { renderReading(found); $('readpicker').value = rid; }
+  }
+
+  function renderReading(r) {
+    CURRENT_ID = r._id;
+    $('read-empty').classList.add('hidden');
+    $('read-body').classList.remove('hidden');
+    $('notes-empty').classList.add('hidden');
+    $('notes-body').classList.remove('hidden');
+    var setText = function (sel, val) { var el = document.querySelector(sel); if (el) { el.textContent = val || '—'; bindable(el); } };
+    setText('[data-display="title"]', r['论文标题'] || '未命名');
+    setText('[data-display="authors"]', r['作者/机构'] || '佚名');
+    setText('[data-display="year"]', r['年份'] || '—');
+    setText('[data-display="venue"]', r['发表源'] || '未知来源');
+    setText('[data-display="adddate"]', (r['添加日期'] || '').slice(0, 10) || '—');
+    setText('[data-display="cat"]', recCats(r).join(' / '));
+    setText('[data-display="keywords"]', r['关键词'] || '—');
+    var pl = $('read-paperlink');
+    if (r['论文原文链接'] && r['论文原文链接'].link) { pl.href = r['论文原文链接'].link; pl.classList.remove('hidden'); } else pl.classList.add('hidden');
+    var dl = $('read-doclink');
+    if (r['结构化文档链接'] && r['结构化文档链接'].link) { dl.href = r['结构化文档链接'].link; dl.classList.remove('hidden'); } else dl.classList.add('hidden');
+
+    // 概要
+    var sum = r['中文结构化摘要'] || '';
+    var sbody = $('summary-body');
+    if (!sum) sbody.innerHTML = '<div class="empty">这篇论文还没有生成中文结构化摘要。在对话中对论文链接使用「论文结构化翻译」skill 即可生成。</div>';
+    else {
+      var lines = String(sum).split('\n');
+      var h = '';
+      for (var i = 0; i < lines.length; i++) {
+        var ln = lines[i].replace(/\s+$/, '');
+        if (!ln) continue;
+        if (/^【.+?】/.test(ln)) h += '<h4>' + esc(ln) + '</h4>';
+        else if (/^#{1,4}\s/.test(ln)) h += '<h4>' + esc(ln.replace(/^#{1,4}\s/, '')) + '</h4>';
+        else if (/^[-*]\s/.test(ln)) h += '<p style="padding-left:12px;">· ' + esc(ln.replace(/^[-*]\s/, '')) + '</p>';
+        else h += '<p>' + esc(ln) + '</p>';
+      }
+      sbody.innerHTML = h;
+    }
+    bindable(sbody);
+
+    // 详细翻译 + 配图
+    var detail = r['详细章节翻译(带图)'] || '';
+    var figs = r['配图'] || [];
+    var gal = $('figures-gallery');
+    if (figs && figs.length) {
+      var gh = '<div class="fig-gallery">';
+      for (var g = 0; g < figs.length; g++) {
+        var f = figs[g];
+        if (f && f.imageUrl) gh += '<a href="' + esc(f.imageUrl) + '" target="_blank" rel="noopener"><img src="' + esc(f.imageUrl) + '" alt="' + esc(f.title || ('图' + (g+1))) + '" /></a>';
+      }
+      gh += '</div>';
+      gal.innerHTML = gh;
+      gal.classList.remove('hidden');
+    } else { gal.innerHTML = ''; gal.classList.add('hidden'); }
+    bindable(gal);
+
+    var dbody = $('detail-body');
+    if (!detail) dbody.innerHTML = '<div class="empty" style="background:#fff;">这篇论文还没有生成详细章节翻译。在对话中对论文链接使用「论文结构化翻译」skill，选择「详细翻译+配图」模式生成。</div>';
+    else dbody.innerHTML = renderMarkdown(detail);
+    bindable(dbody);
+
+    // 5格笔记 + 自由备注
+    setTextarea('innovation', r['核心创新点'] || '');
+    setTextarea('method', r['方法关键'] || '');
+    setTextarea('experiment', r['实验结论'] || '');
+    setTextarea('limit', r['局限与质疑'] || '');
+    setTextarea('inspire', r['对我的启发'] || '');
+    $('notes-extra').value = r['个人阅读体会'] || '';
+    $('notes-status').value = optId('状态', recStatus(r));
+    $('notes-relevance').value = r['相关性'] ? optId('相关性', r['相关性']) : '';
+    $('btn-approve').classList.toggle('hidden', recStatus(r) !== '待判断相关性');
+  }
+  function setTextarea(field, val) {
+    var els = document.querySelectorAll('textarea[data-field="' + field + '"]');
+    for (var i = 0; i < els.length; i++) { els[i].value = val; bindable(els[i]); }
+  }
+  function renderMarkdown(md) {
+    var lines = String(md).split('\n');
+    var h = '';
+    var inList = false;
+    for (var i = 0; i < lines.length; i++) {
+      var ln = lines[i];
+      if (/^###\s+/.test(ln)) { if (inList) { h += '</ul>'; inList = false; } h += '<h5>' + esc(ln.replace(/^###\s+/, '')) + '</h5>'; }
+      else if (/^##\s+/.test(ln)) { if (inList) { h += '</ul>'; inList = false; } h += '<h4>' + esc(ln.replace(/^##\s+/, '')) + '</h4>'; }
+      else if (/^#\s+/.test(ln)) { if (inList) { h += '</ul>'; inList = false; } h += '<h3>' + esc(ln.replace(/^#\s+/, '')) + '</h3>'; }
+      else if (/^!\[\]\(([^)]+)\)/.test(ln)) { if (inList) { h += '</ul>'; inList = false; } var url = RegExp.$1; h += '<img src="' + esc(url) + '" alt="" />'; }
+      else if (/^!\[([^\]]*)\]\(([^)]+)\)/.test(ln)) { if (inList) { h += '</ul>'; inList = false; } var alt = RegExp.$1; var u = RegExp.$2; h += '<img src="' + esc(u) + '" alt="' + esc(alt) + '" />'; }
+      else if (/^[-*]\s+/.test(ln)) { if (!inList) { h += '<ul>'; inList = true; } h += '<li>' + esc(ln.replace(/^[-*]\s+/, '')) + '</li>'; }
+      else if (!ln.trim()) { if (inList) { h += '</ul>'; inList = false; } }
+      else { if (inList) { h += '</ul>'; inList = false; } h += '<p>' + esc(ln) + '</p>'; }
+    }
+    if (inList) h += '</ul>';
+    return h || '<div class="empty">（详细翻译为空）</div>';
+  }
+
+  function saveNotes() {
+    if (!CURRENT_ID) { toast('请先选择论文'); return; }
+    var props = {};
+    props['个人阅读体会'] = { text: $('notes-extra').value };
+    props['核心创新点'] = { text: $('innovation-field') ? $('innovation-field').value : getTextarea('innovation') };
+    props['方法关键'] = { text: getTextarea('method') };
+    props['实验结论'] = { text: getTextarea('experiment') };
+    props['局限与质疑'] = { text: getTextarea('limit') };
+    props['对我的启发'] = { text: getTextarea('inspire') };
+    if ($('notes-status').value) props['状态'] = { select: $('notes-status').value };
+    if ($('notes-relevance').value) props['相关性'] = { select: $('notes-relevance').value };
+    var btn = $('btn-savenotes'); btn.disabled = true;
+    try {
+      db.updateRecord({ databaseId: DATABASE_ID, recordId: CURRENT_ID, properties: props }).then(function () {
+        btn.disabled = false; toast('笔记已保存 ✓'); refreshData();
+      }).catch(function () { btn.disabled = false; toast('保存失败'); });
+    } catch (e) { btn.disabled = false; toast('保存失败'); }
+  }
+  function getTextarea(field) {
+    var els = document.querySelectorAll('textarea[data-field="' + field + '"]');
+    return els.length ? els[0].value : '';
+  }
+
+  function quickStatus(statusText) {
+    if (!CURRENT_ID) { toast('请先选择论文'); return; }
+    var props = { '状态': { select: optId('状态', statusText) } };
+    if (statusText === '已读已评价' && !$('notes-extra').value.trim()) toast('建议先写阅读体会再标记已读');
+    if (statusText === '已读已评价') props['个人阅读体会'] = { text: $('notes-extra').value };
+    try {
+      db.updateRecord({ databaseId: DATABASE_ID, recordId: CURRENT_ID, properties: props }).then(function () {
+        toast('状态已更新为「' + statusText + '」');
+        $('notes-status').value = optId('状态', statusText); refreshData();
+      }).catch(function () { toast('更新失败'); });
+    } catch (e) { toast('更新失败'); }
+  }
+
+  /* 思维导图 */
+  function renderMindmap() {
+    var box = $('mapbox');
+    if (!ALL_RECORDS.length) { box.innerHTML = '<div class="empty">资料库为空，添加论文后自动生成思维导图</div>'; return; }
+    var LEAF_H = 36, CAT_GAP = 34, MARGIN = 30;
+    var ROOT_X = 30, ROOT_W = 150, CAT_X = 290, CAT_W = 200, LEAF_X = 610, LEAF_W = 330;
+    var groups = [];
+    for (var c = 0; c < CATS.length; c++) {
+      var papers = [];
+      for (var i = 0; i < ALL_RECORDS.length; i++) if (recCats(ALL_RECORDS[i]).indexOf(CATS[c]) >= 0) papers.push(ALL_RECORDS[i]);
+      papers.sort(function (a, b) { return (b['年份'] || 0) - (a['年份'] || 0); });
+      groups.push({ name: CATS[c], papers: papers, h: Math.max(1, papers.length) * LEAF_H });
+    }
+    var totalH = 0; for (var g = 0; g < groups.length; g++) totalH += groups[g].h;
+    totalH += CAT_GAP * (groups.length - 1);
+    var H = totalH + MARGIN * 2; var W = 980;
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', W); svg.setAttribute('height', Math.max(H, 300));
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + Math.max(H, 300));
+    function makeNode(x, y, w, h, text, fill, stroke, textColor, fontSize, rid) {
+      var gEl = document.createElementNS(ns, 'g'); gEl.setAttribute('class', 'mm-node');
+      var rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', x); rect.setAttribute('y', y); rect.setAttribute('width', w); rect.setAttribute('height', h);
+      rect.setAttribute('rx', 8); rect.setAttribute('fill', fill); rect.setAttribute('stroke', stroke); rect.setAttribute('stroke-width', 1.5);
+      var txt = document.createElementNS(ns, 'text');
+      txt.setAttribute('x', x + 10); txt.setAttribute('y', y + h / 2 + fontSize * 0.36);
+      txt.setAttribute('font-size', fontSize); txt.setAttribute('fill', textColor); bindable(txt); txt.textContent = text;
+      gEl.appendChild(rect); gEl.appendChild(txt);
+      if (rid) { gEl.addEventListener('click', function () { openReading(rid); });
+        var title = document.createElementNS(ns, 'title'); title.textContent = text; gEl.appendChild(title); }
+      svg.appendChild(gEl);
+      return { x: x, y: y, w: w, h: h };
+    }
+    function link(x1, y1, x2, y2, color) {
+      var mx = (x1 + x2) / 2; var p = document.createElementNS(ns, 'path');
+      p.setAttribute('d', 'M ' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2);
+      p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', 1.6); p.setAttribute('stroke-opacity', 0.55);
+      svg.appendChild(p);
+    }
+    var rootY = H / 2 - 24;
+    var rootNode = makeNode(ROOT_X, rootY, ROOT_W, 48, 'lidar-img-3DGS 论文库', '#1e3a8a', '#1e3a8a', '#fff', 14, null);
+    var y = MARGIN;
+    for (var gi = 0; gi < groups.length; gi++) {
+      var grp = groups[gi]; var catCy = y + grp.h / 2;
+      var catNode = makeNode(CAT_X, catCy - 20, CAT_W, 40, grp.name + '（' + grp.papers.length + '）', '#fff', CAT_COLORS[grp.name], CAT_COLORS[grp.name], 13, null);
+      link(rootNode.x + rootNode.w, rootY + 24, catNode.x, catCy, CAT_COLORS[grp.name]);
+      for (var pi = 0; pi < grp.papers.length; pi++) {
+        var p = grp.papers[pi]; var ly = y + pi * LEAF_H;
+        var stc = ST_CLASS[recStatus(p)] || 'pending';
+        var color = stc === 'pending' ? '#f59e0b' : (stc === 'toread' ? '#3b82f6' : '#16a34a');
+        var label = (p['论文标题'] || '未命名'); if (label.length > 34) label = label.slice(0, 33) + '…';
+        label += '（' + (p['年份'] || '') + '）';
+        var leaf = makeNode(LEAF_X, ly + 2, LEAF_W, LEAF_H - 6, label, '#fff', color, '#334155', 12, p._id);
+        link(catNode.x + catNode.w, catCy, leaf.x, ly + LEAF_H / 2 - 1, CAT_COLORS[grp.name]);
+      }
+      if (!grp.papers.length) {
+        var emptyLeaf = makeNode(LEAF_X, y - 10, 160, 26, '（暂无论文）', '#f8fafc', '#cbd5e1', '#94a3b8', 11, null);
+        link(catNode.x + catNode.w, catCy, emptyLeaf.x, y + 3, CAT_COLORS[grp.name]);
+      }
+      y += grp.h + CAT_GAP;
+    }
+    box.innerHTML = ''; box.appendChild(svg);
+  }
+
+  /* 论文写作 */
+  function generateDraft() {
+    var topic = ($('write-topic').value || '').trim();
+    if (!topic) { toast('请先输入论文方向'); return; }
+    if (!ALL_RECORDS.length) { toast('资料库为空，无法生成'); return; }
+    var order = { '已读已评价': 0, '待精读': 1, '待判断相关性': 2 };
+    var recs = ALL_RECORDS.slice(0);
+    recs.sort(function (a, b) { return (order[recStatus(a)] || 9) - (order[recStatus(b)] || 9); });
+    var n = recs.length, nDone=0, nRead=0;
+    for (var i = 0; i < n; i++) { var st = recStatus(recs[i]); if (st==='已读已评价') nDone++; else if (st==='待精读') nRead++; }
+    var L = [];
+    L.push('# 面向「' + topic + '」的论文写作草稿');
+    L.push(''); L.push('> 生成时间：' + todayStr() + '｜素材来源：lidar-img-3DGS 论文资料库（共 ' + n + ' 篇，其中已读已评价 ' + nDone + ' 篇、待精读 ' + nRead + ' 篇）');
+    L.push('> ⚠️ 本草稿为结构化骨架与素材组织，所有论述、数据与引用均需人工核实、改写与润色后再使用。'); L.push('');
+    L.push('## 摘要（草稿）'); L.push('');
+    L.push('三维高斯泼溅（3D Gaussian Splatting, 3DGS）以其高质量的实时新视角合成能力，成为三维重建领域的重要技术路线。然而，' + topic + ' 仍面临训练开销大、多模态数据融合困难、几何精度不足与渲染伪影等挑战。针对上述问题，本文围绕' + topic + '开展研究：（方法思路占位——结合地面/手持LiDAR点云的几何先验与彩色图像的外观信息，研究高效高保真的3DGS重建方法）。实验拟在（数据集占位）上验证所提方法在（指标占位：渲染质量PSNR/SSIM/LPIPS、几何精度Chamfer距离、训练时间与显存）方面的性能。结果表明（结果占位）。'); L.push('');
+    L.push('## 1 引言（草稿骨架）'); L.push('');
+    L.push('**研究背景与意义**：3DGS通过显式高斯表示与可微光栅化实现了实时高质量渲染，在测绘、数字孪生、AR/VR等领域应用前景广泛。'); L.push('');
+    L.push('**现存问题**：结合资料库中 ' + n + ' 篇文献的梳理，当前主要瓶颈包括：');
+    L.push('1. 训练与渲染开销大，资源受限场景难以部署（对应「训练加速」方向）；');
+    L.push('2. LiDAR点云与彩色图像两类模态的配准、尺度一致性与联合优化困难（对应「多模态融合」方向）；');
+    L.push('3. 高斯显式表示的几何精度有限，表面重建质量不足（对应「几何质量增强」方向）；');
+    L.push('4. 训练不充分或视角稀疏时出现伪影与模糊（对应「图像质量与伪影抑制」方向）。'); L.push('');
+    L.push('**本文贡献（占位，建议3条）**：');
+    L.push('1. （贡献一占位）'); L.push('2. （贡献二占位）'); L.push('3. （贡献三占位）'); L.push('');
+    L.push('## 2 国内外研究现状（基于资料库自动组织）'); L.push('');
+    for (var c = 0; c < CATS.length; c++) {
+      var cat = CATS[c]; var inCat = [];
+      for (var j = 0; j < recs.length; j++) if (recCats(recs[j]).indexOf(cat) >= 0) inCat.push(recs[j]);
+      var secNo = '2.' + (c + 1);
+      if (!inCat.length) { L.push('### ' + secNo + ' ' + cat); L.push(''); L.push('（资料库中该方向暂无论文，建议补充文献后再完善本节。）'); L.push(''); continue; }
+      L.push('### ' + secNo + ' ' + cat + '（资料库收录 ' + inCat.length + ' 篇）'); L.push('');
+      for (var k = 0; k < inCat.length; k++) {
+        var p = inCat[k];
+        var who = (p['作者/机构'] || '该文作者'); var venue = p['发表源'] || ''; var yr = p['年份'] || ''; var one = p['一句话总结'] || '（待补充一句话总结）';
+        L.push('- **' + (p['论文标题'] || '未命名') + '**（' + who + '，' + yr + (venue ? '，' + venue : '') + '）：' + one);
+      }
+      L.push(''); L.push('（小结占位：上述工作分别从……角度推进了' + cat + '，但在……方面仍存在不足，这为本文提供了切入点。）'); L.push('');
+    }
+    L.push('## 参考文献（草稿，请按目标期刊/会议格式整理）'); L.push('');
+    var idx = 1;
+    for (var m = 0; m < recs.length; m++) {
+      var r = recs[m];
+      var linkStr = (r['论文原文链接'] && r['论文原文链接'].link) ? r['论文原文链接'].link : '';
+      L.push('[' + (idx++) + '] ' + (r['论文标题'] || '未命名') + '.' + (r['发表源'] || '') + ' ' + (r['年份'] || '') + '.' + linkStr);
+    }
+    L.push(''); L.push('---');
+    L.push('💡 下一步：复制本草稿，在 WorkBuddy 对话中使用「学术论文写作」skill（输入论文方向+粘贴草稿），即可生成深度打磨的完整版本。');
+    $('write-empty').classList.add('hidden');
+    $('write-out-wrap').classList.remove('hidden');
+    var out = $('draftout'); out.textContent = L.join('\n'); bindable(out);
+    toast('草稿已生成');
+  }
+  function copyDraft() {
+    var text = $('draftout').textContent || '';
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(function () { toast('已复制到剪贴板'); }); } else { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('已复制到剪贴板'); } } catch (e) { toast('复制失败'); }
+  }
+
+  /* 搜索模块 */
+  function renderChannels() {
+    var tb = $('channeltbody'); if (!tb) return;
+    if (!ALL_CHANNELS.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">暂无渠道，点「➕添加新渠道」开始</td></tr>'; return; }
+    var h = '';
+    for (var i = 0; i < ALL_CHANNELS.length; i++) {
+      var c = ALL_CHANNELS[i];
+      var enabled = c['启用'] === true || c['启用'] === 'true';
+      h += '<tr>' +
+        '<td><b>' + esc(c['渠道名称'] || '未命名') + '</b></td>' +
+        '<td>' + esc(c['渠道类型'] || '-') + '</td>' +
+        '<td style="max-width:260px;word-break:break-all;font-size:11px;color:#475569;">' + esc(c['搜索URL/API'] || '-') + '</td>' +
+        '<td>' + esc(c['默认关键词'] || '-') + '</td>' +
+        '<td>' + esc(String(c['每日推送数量'] || 0)) + '</td>' +
+        '<td><span class="' + (enabled ? 'pill-on' : 'pill-off') + '">' + (enabled ? '已启用' : '已禁用') + '</span></td>' +
+        '<td><button class="btn btn-outline" data-act="toggle" data-id="' + esc(c._id) + '">' + (enabled ? '⛔禁用' : '✅启用') + '</button> <button class="btn btn-outline" data-act="edit" data-id="' + esc(c._id) + '">✏️编辑</button> <button class="btn btn-red" data-act="del" data-id="' + esc(c._id) + '">🗑</button></td>' +
+        '</tr>';
+    }
+    tb.innerHTML = h;
+    var btns = tb.querySelectorAll('button[data-act]');
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].onclick = function () {
+        var act = this.getAttribute('data-act');
+        var id = this.getAttribute('data-id');
+        var rec = null;
+        for (var k = 0; k < ALL_CHANNELS.length; k++) if (ALL_CHANNELS[k]._id === id) rec = ALL_CHANNELS[k];
+        if (!rec) return;
+        if (act === 'toggle') toggleChannel(rec);
+        else if (act === 'edit') openChannelModal(rec);
+        else if (act === 'del') deleteChannel(rec);
+      };
+    }
+  }
+  function toggleChannel(rec) {
+    var newVal = !(rec['启用'] === true || rec['启用'] === 'true');
+    db.updateRecord({ databaseId: 'H2ElVIUQlDNgS1SxXD0A19', recordId: rec._id, properties: { '启用': { checkbox: newVal } } }).then(function () {
+      toast(newVal ? '已启用：' + rec['渠道名称'] : '已禁用：' + rec['渠道名称']); refreshData();
+    }).catch(function () { toast('操作失败'); });
+  }
+  function deleteChannel(rec) {
+    if (!confirm('确定要删除渠道「' + (rec['渠道名称'] || '') + '」吗？')) return;
+    db.deleteRecord({ databaseId: 'H2ElVIUQlDNgS1SxXD0A19', recordId: rec._id }).then(function () {
+      toast('已删除'); refreshData();
+    }).catch(function () { toast('删除失败'); });
+  }
+  function openChannelModal(rec) {
+    EDITING_CH_ID = rec ? rec._id : null;
+    $('modal-title').textContent = rec ? '编辑搜索渠道' : '添加新渠道';
+    $('ch-name').value = rec ? (rec['渠道名称'] || '') : '';
+    $('ch-type').value = rec ? (rec['渠道类型'] || '') : '';
+    $('ch-url').value = rec ? (rec['搜索URL/API'] || '') : '';
+    $('ch-keywords').value = rec ? (rec['默认关键词'] || '') : '';
+    $('ch-qty').value = rec ? (rec['每日推送数量'] || 3) : 3;
+    $('ch-enabled').value = rec ? String(rec['启用'] === true || rec['启用'] === 'true') : 'true';
+    $('ch-note').value = rec ? (rec['备注'] || '') : '';
+    $('modal-bg').classList.remove('hidden');
+  }
+  function saveChannel() {
+    var name = ($('ch-name').value || '').trim();
+    var type = $('ch-type').value;
+    if (!name || !type) { toast('请填写渠道名称和类型'); return; }
+    var props = {
+      '渠道名称': { text: name },
+      '渠道类型': { select: type },
+      '搜索URL/API': { text: $('ch-url').value.trim() },
+      '默认关键词': { text: $('ch-keywords').value.trim() },
+      '每日推送数量': { number: parseInt($('ch-qty').value, 10) || 3 },
+      '启用': { checkbox: $('ch-enabled').value === 'true' },
+      '备注': { text: $('ch-note').value.trim() }
+    };
+    if (EDITING_CH_ID) {
+      db.updateRecord({ databaseId: 'H2ElVIUQlDNgS1SxXD0A19', recordId: EDITING_CH_ID, properties: props }).then(function () {
+        toast('已更新'); $('modal-bg').classList.add('hidden'); refreshData();
+      }).catch(function () { toast('更新失败'); });
+    } else {
+      db.addRecord({ databaseId: 'H2ElVIUQlDNgS1SxXD0A19', properties: props }).then(function () {
+        toast('已添加'); $('modal-bg').classList.add('hidden'); refreshData();
+      }).catch(function () { toast('添加失败'); });
+    }
+  }
+  function genSearchPrompt() {
+    var kw = ($('search-kw').value || '').trim();
+    if (!kw) { toast('请输入关键词'); return; }
+    var ctype = $('search-chtype').value;
+    var top = parseInt($('search-top').value, 10) || 5;
+    var enabled = [];
+    for (var i = 0; i < ALL_CHANNELS.length; i++) {
+      var c = ALL_CHANNELS[i];
+      if (!(c['启用'] === true || c['启用'] === 'true')) continue;
+      if (ctype && c['渠道类型'] !== ctype) continue;
+      enabled.push(c);
+    }
+    var chText = enabled.length ? enabled.map(function (c) { return '  - ' + c['渠道名称'] + '（' + c['渠道类型'] + '）：' + c['搜索URL/API']; }).join('\n') : '  - 全部已启用渠道（请先在搜索渠道表中启用至少一个）';
+    var prompt = '# 主动搜索任务\n\n## 关键词\n' + kw + '\n\n## 最相关篇数\n' + top + '\n\n## 渠道范围\n' + (ctype || '全部启用') + '\n\n## 当前启用的搜索渠道\n' + chText + '\n\n## 执行步骤\n1. 加载用户级 skill「3dgs每日论文搜索」（C:\\Users\\yj_zo\\.workbuddy\\skills\\3dgs每日论文搜索\\SKILL.md）。\n2. 按上述关键词和渠道范围检索。\n3. 筛出最相关前 ' + top + ' 篇。\n4. 中文摘要文档挂到「📥 待阅读区」（nodeId=th8CPBrjAOWbnGgRWJ3mIt）下。\n5. 写入「3DGS论文总表」（database-id=OJLJkCoJSkV3TdHWBVEjhH），状态=待判断相关性。\n6. 列出今日候选清单返回。\n\n## 注意\n- 资料库操作时加载 library skill 并按其鉴权流程执行。\n- 已存在的论文按标题去重。\n- 如无可相关论文如实说明，不要降低标准凑数。';
+    $('search-prompt').value = prompt;
+  }
+  function copyPrompt() {
+    var text = $('search-prompt').value || '';
+    if (!text) { toast('先生成搜索指令'); return; }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(function () { toast('已复制'); }); } else { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('已复制'); } } catch (e) { toast('复制失败'); }
+  }
+  function renderRecentPushed() {
+    var ul = $('recentlist');
+    var rec = [];
+    for (var i = 0; i < ALL_RECORDS.length; i++) {
+      if (recStatus(ALL_RECORDS[i]) === '待判断相关性') rec.push(ALL_RECORDS[i]);
+    }
+    rec.sort(function (a, b) {
+      var da = (a['添加日期'] || ''); var db = (b['添加日期'] || '');
+      if (da === db) return 0; return da < db ? 1 : -1;
+    });
+    rec = rec.slice(0, 30);
+    if (!rec.length) { ul.innerHTML = '<li><div class="rt" style="color:#94a3b8;">暂无待判断的论文</div></li>'; return; }
+    var h = '';
+    for (var j = 0; j < rec.length; j++) {
+      var p = rec[j];
+      h += '<li>' +
+        '<div class="rt">' + esc(p['论文标题'] || '未命名') + '</div>' +
+        '<div class="rm">' + esc(p['作者/机构'] || '') + ' · ' + esc(p['发表源'] || '') + ' · ' + esc(p['年份'] || '') + ' · 添加于 ' + esc((p['添加日期'] || '').slice(0, 10)) + '</div>' +
+        '<div class="ra">' + esc(p['一句话总结'] || '') + '</div>' +
+        '</li>';
+    }
+    ul.innerHTML = h;
+  }
+
+  /* Tabs */
+  function switchTab(name) {
+    var tabs = document.querySelectorAll('nav.tabs button[data-tab]');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab') === name);
+    var secs = ['overview', 'read', 'map', 'write', 'search'];
+    for (var j = 0; j < secs.length; j++) { var el = $('tab-' + secs[j]); if (el) el.classList.toggle('hidden', secs[j] !== name); }
+    if (name === 'map') renderMindmap();
+    if (name === 'search') { renderChannels(); renderRecentPushed(); }
+  }
+
+  function bindEvents() {
+    var tabs = document.querySelectorAll('nav.tabs button[data-tab]');
+    for (var i = 0; i < tabs.length; i++) tabs[i].onclick = function () { switchTab(this.getAttribute('data-tab')); };
+    $('btn-refresh').onclick = function () { refreshData(); };
+    var chips = document.querySelectorAll('.fchip');
+    for (var j = 0; j < chips.length; j++) {
+      chips[j].onclick = function () {
+        for (var x = 0; x < chips.length; x++) chips[x].classList.remove('on');
+        this.classList.add('on'); FILTER_STATUS = this.getAttribute('data-fstatus'); renderPaperList();
+      };
+    }
+    $('searchbox').oninput = function () { SEARCH = this.value.trim(); renderPaperList(); };
+    $('btn-addpaper').onclick = submitPaper;
+    var addBox = document.querySelector('details.addform');
+    if (addBox) { addBox.addEventListener('input', debounceCache); addBox.addEventListener('change', debounceCache); }
+    $('readpicker').onchange = function () { if (this.value) openReading(this.value); };
+    $('btn-savenotes').onclick = saveNotes;
+    $('btn-approve').onclick = function () { quickStatus('待精读'); };
+    $('btn-finish').onclick = function () { quickStatus('已读已评价'); };
+    $('btn-gen').onclick = generateDraft;
+    $('btn-copydraft').onclick = copyDraft;
+    $('btn-addchannel').onclick = function () { openChannelModal(null); };
+    $('modal-cancel').onclick = function () { $('modal-bg').classList.add('hidden'); };
+    $('modal-save').onclick = saveChannel;
+    $('btn-genprompt').onclick = genSearchPrompt;
+    $('btn-copyprompt').onclick = copyPrompt;
+  }
+
+  bindEvents();
+  init();
+})();
+</script>
+</body>
+</html>
