@@ -10,7 +10,8 @@
 | 📥 待阅读区 | doc | `th8CPBrjAOWbnGgRWJ3mIt` | 每日新论文挂这里 |
 | 📚 论文分类导航 | doc | `ClHqszSsqjyI15Yb0gNh8e` | 按四大方向分小标题 |
 | 3DGS论文Review工作台 v1 | page | `EoR3BCTV6FS42ThkuksFuK` | 4模块 v1 |
-| 3DGS论文Review工作台 v2 | page | `2KgYz0c9VePzq0qUX0Tog5` | 5模块 v2 当前主推 |
+| 3DGS论文Review工作台 v2 | page | `2KgYz0c9VePzq0qUX0Tog5` | 5模块 v2 |
+| 3DGS论文Review工作台 v3 | page | `cnNeSwq1b6IJhMfx4D2tKe` | 5模块+思维导图美化+智能搜索，当前主推 |
 | 3DGS论文总表 | database | `OJLJkCoJSkV3TdHWBVEjhH` | 21字段 |
 | 论文搜索渠道 | database | `H2ElVIUQlDNgS1SxXD0A19` | 7字段 |
 
