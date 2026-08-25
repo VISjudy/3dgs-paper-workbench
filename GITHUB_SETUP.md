@@ -1,8 +1,8 @@
 # GitHub 推送指南
 
 本地 git 仓库已初始化：
-- `dev` 分支：当前开发版（v1 + v2 都在，HEAD = a0ca000）
-- `main` 分支：当前等于 dev；v2 经你确认稳定后再合并
+- `dev` 分支：当前开发版（v1 + v2 + v3 都在，HEAD = 2071704）
+- `main` 分支：当前等于 dev；v3 经你确认稳定后再合并
 
 下一步：把本地仓库推到 GitHub。两种方式任选。
 
@@ -28,9 +28,13 @@ git push -u origin dev
 
 仓库创建后会出现在 https://github.com/VISjudy/3dgs-paper-workbench
 
-## 方式 B · 用 WorkBuddy 的 GitHub 连接器
+## 方式 B · 用 WorkBuddy 的 GitHub 连接器（已连接 ✓）
 
-如果你的 WorkBuddy 已连 GitHub MCP，可直接授权我帮你创建仓库。但当前连接器显示未连接——你打开左侧 "GitHub" 卡片授权后告诉我即可。
+GitHub MCP 已连接（账号 VISjudy），可直接让智能体用 `push_files` 推送文件到已存在的仓库。
+注意：MCP 推送会生成新提交（不保留本地 commit 历史），推送后本地需同步一次：
+```bash
+git fetch origin && git reset --hard origin/main   # main 分支
+```
 
 ## 方式 C · 纯手动（无 gh CLI 也不连 connector）
 

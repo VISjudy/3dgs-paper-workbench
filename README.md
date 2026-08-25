@@ -20,12 +20,17 @@ project/
 ├── skills/                              # 用户级 skill 源码
 │   ├── 3dgs论文结构化翻译/SKILL.md
 │   ├── 3dgs学术论文写作/SKILL.md
-│   └── 3dgs每日论文搜索/SKILL.md
+│   ├── 3dgs每日论文搜索/SKILL.md
+│   └── 3dgs论文总结详细解读/SKILL.md
 ├── v1/                                  # 2026-08-25 v1（4模块）
 │   ├── workbench.html
 │   ├── canonical_schema.json
 │   └── CHANGELOG.md
-└── v2/                                  # 2026-08-25 v2（5模块 + 详细翻译+配图 + 5格笔记 + 搜索渠道）
+├── v2/                                  # 2026-08-25 v2（5模块 + 详细翻译+配图 + 5格笔记 + 搜索渠道）
+│   ├── workbench.html
+│   ├── canonical_schema.json
+│   └── CHANGELOG.md
+└── v3/                                  # 2026-08-25 v3（思维导图美化 + 智能搜索 + 总结解读skill）
     ├── workbench.html
     ├── canonical_schema.json
     └── CHANGELOG.md
